@@ -1,7 +1,12 @@
 <div class="workspace">
   <div class="element-toolbar">
     <div class="element-container">
-      <app-element symbol="H" valenceElectrons="1"></app-element>
+      <app-element
+        symbol="H"
+        valenceElectrons="1"
+        draggable="true"
+        (dragstart)="drag($event)"
+      ></app-element>
     </div>
     <div class="element-container">
       <app-element symbol="C" valenceElectrons="4"></app-element>
@@ -20,6 +25,6 @@
     </div>
   </div>
   <div>
-    <div class="editor"></div>
+    <app-editor></app-editor>
   </div>
 </div>
