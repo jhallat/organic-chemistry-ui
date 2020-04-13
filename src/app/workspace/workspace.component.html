@@ -1,27 +1,12 @@
 <div class="workspace">
   <div class="element-toolbar">
-    <div class="element-container">
+    <div *ngFor="let element of elements" class="element-container">
       <app-element
-        symbol="H"
-        valenceElectrons="1"
+        symbol="{{ element.symbol }}"
+        valenceElectrons="{{ element.valenceElectrons }}"
         draggable="true"
-        (dragstart)="drag($event)"
+        (dragstart)="drag($event, element)"
       ></app-element>
-    </div>
-    <div class="element-container">
-      <app-element symbol="C" valenceElectrons="4"></app-element>
-    </div>
-    <div class="element-container">
-      <app-element symbol="N" valenceElectrons="5"></app-element>
-    </div>
-    <div class="element-container">
-      <app-element symbol="O" valenceElectrons="6"></app-element>
-    </div>
-    <div class="element-container">
-      <app-element symbol="P" valenceElectrons="5"></app-element>
-    </div>
-    <div class="element-container">
-      <app-element symbol="S" valenceElectrons="6"></app-element>
     </div>
   </div>
   <div>

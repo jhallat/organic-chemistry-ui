@@ -1,4 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef } from "@angular/core";
+import { ElementService } from "../shared/element.service";
 
 @Component({
   selector: "app-editor",
@@ -10,8 +11,18 @@ export class EditorComponent implements OnInit {
   canvas: ElementRef<HTMLCanvasElement>;
 
   private ctx: CanvasRenderingContext2D;
+  private electronOffsets = [
+    [-4, -18],
+    [4, 18],
+    [-18, -4],
+    [18, 6],
+    [4, -18],
+    [-4, 18],
+    [-18, -6],
+    [18, 4],
+  ];
 
-  constructor() {}
+  constructor(private elementService: ElementService) {}
 
   ngOnInit() {
     const width = this.canvas.nativeElement.width;
@@ -22,7 +33,33 @@ export class EditorComponent implements OnInit {
   }
 
   drop(event) {
-    console.log(event.dataTransfer.getData("symbol"));
+    const symbol = event.dataTransfer.getData("symbol");
+    const element: ChemElement = this.elementService.find(symbol);
+    console.log(element);
+    if (element.symbol) {
+      this.ctx.font = "30px sans-serif";
+      this.ctx.textAlign = "center";
+      this.ctx.textBaseline = "middle";
+      this.ctx.fillText(element.symbol, event.offsetX, event.offsetY + 3);
+    }
+    if (element.valenceElectrons) {
+      for (let i = 0; i < element.valenceElectrons; i++) {
+        this.ctx.beginPath();
+        this.ctx.arc(
+          event.offsetX + this.electronOffsets[i][0],
+          event.offsetY + this.electronOffsets[i][1],
+          3,
+          0,
+          2 * Math.PI
+        );
+        this.ctx.fillStyle = "black";
+        this.ctx.fill();
+      }
+    }
+  }
+
+  mouseMove(event) {
+    console.log(event);
   }
 
   allowDrop(event) {

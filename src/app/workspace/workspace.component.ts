@@ -1,4 +1,5 @@
 import { Component, OnInit } from "@angular/core";
+import { ElementService } from "../shared/element.service";
 
 @Component({
   selector: "app-workspace",
@@ -6,14 +7,15 @@ import { Component, OnInit } from "@angular/core";
   styleUrls: ["./workspace.component.scss"],
 })
 export class WorkspaceComponent implements OnInit {
-  constructor() {}
+  constructor(private elementService: ElementService) {}
 
-  ngOnInit() {}
+  elements: ChemElement[];
 
-  drag(event) {
-    event.dataTransfer.setData(
-      "symbol",
-      event.target.attributes["symbol"].value
-    );
+  ngOnInit() {
+    this.elements = this.elementService.findAll();
+  }
+
+  drag(event, element) {
+    event.dataTransfer.setData("symbol", element.symbol);
   }
 }
