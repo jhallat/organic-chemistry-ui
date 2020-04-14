@@ -31,7 +31,7 @@ export class EditorComponent implements OnInit {
 
   drop(event) {
     const symbol = event.dataTransfer.getData('symbol');
-    const element: ChemElement = this.elementService.find(symbol);
+    const element: ElementDefinition = this.elementService.find(symbol);
     this.renderer.addElement(element, event.offsetX, event.offsetY);
   }
 
@@ -46,6 +46,14 @@ export class EditorComponent implements OnInit {
   allowDrop(event) {
     if (!this.renderer.isOccupied(event.offsetX, event.offsetY)) {
       event.preventDefault();
+    }
+  }
+
+  click(event) {
+    if (event.ctrlKey) {
+      this.renderer.multiSelect(event.offsetX, event.offsetY);
+    } else {
+      this.renderer.singleSelect(event.offsetX, event.offsetY);
     }
   }
 }

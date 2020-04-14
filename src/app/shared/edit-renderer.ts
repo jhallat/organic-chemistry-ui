@@ -1,27 +1,31 @@
 import { ElementRef } from '@angular/core';
 
+const GRID_SIZE = 60;
+const GRID_STYLE = '#DEDEDE';
+const GRID_BORDER_STYLE = '#000000';
+
+const CURSOR_STYLE = '#0000DD';
+const CURSOR_PADDING = 2;
+
+const ELEMENT_FONT = '30px sans-serif';
+const ELEMENT_NORMAL_STYLE = 'black';
+const ELEMENT_SELECTED_STYLE = '#0000DD';
+
+const ELECTRON_OFFSETS = [
+  [-4, -18],
+  [4, 18],
+  [-18, -4],
+  [18, 6],
+  [4, -18],
+  [-4, 18],
+  [-18, -6],
+  [18, 4],
+];
+
+const SELECT_PADDING = 3;
+const SELECT_STYLE = ELEMENT_SELECTED_STYLE;
+
 export class EditRenderer {
-  readonly GRID_SIZE = 60;
-  readonly GRID_STYLE = '#DEDEDE';
-  readonly GRID_BORDER_STYLE = '#000000';
-
-  readonly CURSOR_STYLE = '#0000DD';
-  readonly CURSOR_PADDING = 2;
-
-  readonly ELEMENT_FONT = '30px sans-serif';
-  readonly ELEMENT_STYLE = 'black';
-
-  readonly ELECTRON_OFFSETS = [
-    [-4, -18],
-    [4, 18],
-    [-18, -4],
-    [18, 6],
-    [4, -18],
-    [-4, 18],
-    [-18, -6],
-    [18, 4],
-  ];
-
   private overlayCanvas: ElementRef<HTMLCanvasElement>;
   private mainCanvas: ElementRef<HTMLCanvasElement>;
   private gridCanvas: ElementRef<HTMLCanvasElement>;
@@ -33,8 +37,8 @@ export class EditRenderer {
   private width: number;
   private height: number;
 
-  //TODO Replace with class
-  private elements: any[] = [];
+  private elements: ElementInstance[] = [];
+  private selectedElements: ElementInstance[] = [];
 
   constructor(
     overlayCanvas: ElementRef<HTMLCanvasElement>,
@@ -54,39 +58,39 @@ export class EditRenderer {
   }
 
   init() {
-    this.gridCtx.strokeStyle = this.GRID_BORDER_STYLE;
+    this.gridCtx.strokeStyle = GRID_BORDER_STYLE;
     this.gridCtx.strokeRect(0, 0, this.width, this.height);
     for (let i = 1; i * 60 <= this.width; i++) {
       this.drawline(
         this.gridCtx,
-        this.GRID_STYLE,
-        i * this.GRID_SIZE,
+        GRID_STYLE,
+        i * GRID_SIZE,
         1,
-        i * this.GRID_SIZE,
+        i * GRID_SIZE,
         this.height - 1
       );
     }
-    for (let i = 1; i * this.GRID_SIZE <= this.height; i++) {
+    for (let i = 1; i * GRID_SIZE <= this.height; i++) {
       this.drawline(
         this.gridCtx,
-        this.GRID_STYLE,
+        GRID_STYLE,
         1,
-        i * this.GRID_SIZE,
+        i * GRID_SIZE,
         this.width - 1,
-        i * this.GRID_SIZE
+        i * GRID_SIZE
       );
     }
   }
 
   moveCursor(x: number, y: number) {
     this.overlayCtx.clearRect(0, 0, this.width, this.height);
-    const gridX = Math.floor(x / this.GRID_SIZE) * this.GRID_SIZE;
-    const gridY = Math.floor(y / this.GRID_SIZE) * this.GRID_SIZE;
-    this.overlayCtx.strokeStyle = this.CURSOR_STYLE;
-    const size = this.GRID_SIZE - this.CURSOR_PADDING * 2;
+    const gridX = Math.floor(x / GRID_SIZE) * GRID_SIZE;
+    const gridY = Math.floor(y / GRID_SIZE) * GRID_SIZE;
+    this.overlayCtx.strokeStyle = CURSOR_STYLE;
+    const size = GRID_SIZE - CURSOR_PADDING * 2;
     this.overlayCtx.strokeRect(
-      gridX + this.CURSOR_PADDING,
-      gridY + this.CURSOR_PADDING,
+      gridX + CURSOR_PADDING,
+      gridY + CURSOR_PADDING,
       size,
       size
     );
@@ -97,33 +101,72 @@ export class EditRenderer {
   }
 
   isOccupied(x: number, y: number): boolean {
-    const gridPosX = Math.floor(x / this.GRID_SIZE);
-    const gridPosY = Math.floor(y / this.GRID_SIZE);
-    if (
-      this.elements.find(
-        (item) => item.gridPosX === gridPosX && item.gridPosY === gridPosY
-      )
-    ) {
+    if (this.findByPosition(x, y)) {
       return true;
     } else {
       return false;
     }
   }
 
-  addElement(element: ChemElement, x: number, y: number) {
-    const gridPosX = Math.floor(x / this.GRID_SIZE);
-    const gridPosY = Math.floor(y / this.GRID_SIZE);
-    this.elements.push({
-      gridPosX,
-      gridPosY,
+  addElement(element: ElementDefinition, x: number, y: number) {
+    const gridPosX = Math.floor(x / GRID_SIZE);
+    const gridPosY = Math.floor(y / GRID_SIZE);
+    const elementInstance: ElementInstance = {
+      x: gridPosX,
+      y: gridPosY,
       element,
-    });
+    };
+    this.elements.push(elementInstance);
+    this.drawElement(elementInstance, ELEMENT_NORMAL_STYLE);
+  }
 
-    const gridX = gridPosX * this.GRID_SIZE + this.GRID_SIZE / 2;
-    const gridY = gridPosY * this.GRID_SIZE + this.GRID_SIZE / 2;
+  singleSelect(x: number, y: number) {
+    const instance = this.findByPosition(x, y);
+    for (const selected of this.selectedElements) {
+      this.drawElement(selected, ELEMENT_NORMAL_STYLE);
+    }
+    this.selectedElements = [];
+    if (instance) {
+      this.selectedElements.push(instance);
+      this.drawElement(instance, ELEMENT_SELECTED_STYLE);
+      this.drawSelectSquare(instance);
+    }
+  }
 
+  multiSelect(x: number, y: number) {
+    const instance = this.findByPosition(x, y);
+    if (instance) {
+      this.selectedElements.push(instance);
+      this.drawElement(instance, ELEMENT_SELECTED_STYLE);
+      this.drawSelectSquare(instance);
+    }
+  }
+
+  private drawSelectSquare(elementInstance: ElementInstance) {
+    this.mainCtx.strokeStyle = SELECT_STYLE;
+    this.mainCtx.strokeRect(
+      elementInstance.x * GRID_SIZE + SELECT_PADDING,
+      elementInstance.y * GRID_SIZE + SELECT_PADDING,
+      GRID_SIZE - SELECT_PADDING * 2,
+      GRID_SIZE - SELECT_PADDING * 2
+    );
+  }
+
+  private drawElement(elementInstance: ElementInstance, style: string) {
+    const element = elementInstance.element;
+    const gridX = elementInstance.x * GRID_SIZE + GRID_SIZE / 2;
+    const gridY = elementInstance.y * GRID_SIZE + GRID_SIZE / 2;
+
+    this.mainCtx.clearRect(
+      elementInstance.x * GRID_SIZE,
+      elementInstance.y * GRID_SIZE,
+      GRID_SIZE,
+      GRID_SIZE
+    );
+
+    this.mainCtx.fillStyle = style;
     if (element.symbol) {
-      this.mainCtx.font = this.ELEMENT_FONT;
+      this.mainCtx.font = ELEMENT_FONT;
       this.mainCtx.textAlign = 'center';
       this.mainCtx.textBaseline = 'middle';
       this.mainCtx.fillText(element.symbol, gridX, gridY + 3);
@@ -132,16 +175,23 @@ export class EditRenderer {
       for (let i = 0; i < element.valenceElectrons; i++) {
         this.mainCtx.beginPath();
         this.mainCtx.arc(
-          gridX + this.ELECTRON_OFFSETS[i][0],
-          gridY + this.ELECTRON_OFFSETS[i][1],
+          gridX + ELECTRON_OFFSETS[i][0],
+          gridY + ELECTRON_OFFSETS[i][1],
           3,
           0,
           2 * Math.PI
         );
-        this.mainCtx.fillStyle = this.ELEMENT_STYLE;
         this.mainCtx.fill();
       }
     }
+  }
+
+  private findByPosition(x: number, y: number): ElementInstance {
+    const gridPosX = Math.floor(x / GRID_SIZE);
+    const gridPosY = Math.floor(y / GRID_SIZE);
+    return this.elements.find(
+      (item) => item.x === gridPosX && item.y === gridPosY
+    );
   }
 
   private drawline(
