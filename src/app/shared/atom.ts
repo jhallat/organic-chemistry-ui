@@ -1,11 +1,11 @@
-class ElementDefinition {
+class AtomDefinition {
   name: string;
   symbol: string;
   valenceElectrons: number;
 }
 
-class ElementInstance {
-  element: ElementDefinition;
+class AtomInstance {
+  atom: AtomDefinition;
   x: number;
   y: number;
 }

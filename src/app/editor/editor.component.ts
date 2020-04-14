@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { ElementService } from '../shared/element.service';
+import { AtomService } from '../shared/atom.service';
 import { EditRenderer } from '../shared/edit-renderer';
 
 @Component({
@@ -19,10 +19,10 @@ export class EditorComponent implements OnInit {
 
   private renderer: EditRenderer;
 
-  private ctx: CanvasRenderingContext2D;
-  private oCtx: CanvasRenderingContext2D;
+  contextVisible = false;
+  contextPosition = { top: 0, left: 0 };
 
-  constructor(private elementService: ElementService) {}
+  constructor(private elementService: AtomService) {}
 
   ngOnInit() {
     this.renderer = new EditRenderer(this.oCanvas, this.canvas, this.gCanvas);
@@ -31,8 +31,8 @@ export class EditorComponent implements OnInit {
 
   drop(event) {
     const symbol = event.dataTransfer.getData('symbol');
-    const element: ElementDefinition = this.elementService.find(symbol);
-    this.renderer.addElement(element, event.offsetX, event.offsetY);
+    const atom: AtomDefinition = this.elementService.find(symbol);
+    this.renderer.addAtom(atom, event.offsetX, event.offsetY);
   }
 
   mouseMove(event) {
@@ -50,10 +50,24 @@ export class EditorComponent implements OnInit {
   }
 
   click(event) {
+    this.contextVisible = false;
     if (event.ctrlKey) {
       this.renderer.multiSelect(event.offsetX, event.offsetY);
     } else {
       this.renderer.singleSelect(event.offsetX, event.offsetY);
+    }
+  }
+
+  contextMenu(event) {
+    event.preventDefault();
+    if (this.renderer.isOccupied(event.offsetX, event.offsetY)) {
+      this.contextVisible = true;
+      this.contextPosition = {
+        top: event.offsetY,
+        left: event.offsetX,
+      };
+    } else {
+      this.contextVisible = false;
     }
   }
 }

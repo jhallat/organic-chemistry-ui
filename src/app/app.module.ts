@@ -5,13 +5,15 @@ import { AppComponent } from './app.component';
 import { WorkspaceComponent } from './workspace/workspace.component';
 import { ElementComponent } from './element/element.component';
 import { EditorComponent } from './editor/editor.component';
+import { ContextMenuComponent } from './context-menu/context-menu.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     WorkspaceComponent,
     ElementComponent,
-    EditorComponent
+    EditorComponent,
+    ContextMenuComponent
   ],
   imports: [
     BrowserModule

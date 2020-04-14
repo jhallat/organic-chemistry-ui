@@ -7,9 +7,9 @@ const GRID_BORDER_STYLE = '#000000';
 const CURSOR_STYLE = '#0000DD';
 const CURSOR_PADDING = 2;
 
-const ELEMENT_FONT = '30px sans-serif';
-const ELEMENT_NORMAL_STYLE = 'black';
-const ELEMENT_SELECTED_STYLE = '#0000DD';
+const ATOM_FONT = '30px sans-serif';
+const ATOM_NORMAL_STYLE = 'black';
+const ATOM_SELECTED_STYLE = '#0000DD';
 
 const ELECTRON_OFFSETS = [
   [-4, -18],
@@ -23,7 +23,7 @@ const ELECTRON_OFFSETS = [
 ];
 
 const SELECT_PADDING = 3;
-const SELECT_STYLE = ELEMENT_SELECTED_STYLE;
+const SELECT_STYLE = ATOM_SELECTED_STYLE;
 
 export class EditRenderer {
   private overlayCanvas: ElementRef<HTMLCanvasElement>;
@@ -37,8 +37,8 @@ export class EditRenderer {
   private width: number;
   private height: number;
 
-  private elements: ElementInstance[] = [];
-  private selectedElements: ElementInstance[] = [];
+  private atoms: AtomInstance[] = [];
+  private selectedAtoms: AtomInstance[] = [];
 
   constructor(
     overlayCanvas: ElementRef<HTMLCanvasElement>,
@@ -108,27 +108,27 @@ export class EditRenderer {
     }
   }
 
-  addElement(element: ElementDefinition, x: number, y: number) {
+  addAtom(atom: AtomDefinition, x: number, y: number) {
     const gridPosX = Math.floor(x / GRID_SIZE);
     const gridPosY = Math.floor(y / GRID_SIZE);
-    const elementInstance: ElementInstance = {
+    const atomInstance: AtomInstance = {
       x: gridPosX,
       y: gridPosY,
-      element,
+      atom,
     };
-    this.elements.push(elementInstance);
-    this.drawElement(elementInstance, ELEMENT_NORMAL_STYLE);
+    this.atoms.push(atomInstance);
+    this.drawAtom(atomInstance, ATOM_NORMAL_STYLE);
   }
 
   singleSelect(x: number, y: number) {
     const instance = this.findByPosition(x, y);
-    for (const selected of this.selectedElements) {
-      this.drawElement(selected, ELEMENT_NORMAL_STYLE);
+    for (const selected of this.selectedAtoms) {
+      this.drawAtom(selected, ATOM_NORMAL_STYLE);
     }
-    this.selectedElements = [];
+    this.selectedAtoms = [];
     if (instance) {
-      this.selectedElements.push(instance);
-      this.drawElement(instance, ELEMENT_SELECTED_STYLE);
+      this.selectedAtoms.push(instance);
+      this.drawAtom(instance, ATOM_SELECTED_STYLE);
       this.drawSelectSquare(instance);
     }
   }
@@ -136,43 +136,43 @@ export class EditRenderer {
   multiSelect(x: number, y: number) {
     const instance = this.findByPosition(x, y);
     if (instance) {
-      this.selectedElements.push(instance);
-      this.drawElement(instance, ELEMENT_SELECTED_STYLE);
+      this.selectedAtoms.push(instance);
+      this.drawAtom(instance, ATOM_SELECTED_STYLE);
       this.drawSelectSquare(instance);
     }
   }
 
-  private drawSelectSquare(elementInstance: ElementInstance) {
+  private drawSelectSquare(atomInstance: AtomInstance) {
     this.mainCtx.strokeStyle = SELECT_STYLE;
     this.mainCtx.strokeRect(
-      elementInstance.x * GRID_SIZE + SELECT_PADDING,
-      elementInstance.y * GRID_SIZE + SELECT_PADDING,
+      atomInstance.x * GRID_SIZE + SELECT_PADDING,
+      atomInstance.y * GRID_SIZE + SELECT_PADDING,
       GRID_SIZE - SELECT_PADDING * 2,
       GRID_SIZE - SELECT_PADDING * 2
     );
   }
 
-  private drawElement(elementInstance: ElementInstance, style: string) {
-    const element = elementInstance.element;
-    const gridX = elementInstance.x * GRID_SIZE + GRID_SIZE / 2;
-    const gridY = elementInstance.y * GRID_SIZE + GRID_SIZE / 2;
+  private drawAtom(atomInstance: AtomInstance, style: string) {
+    const atom = atomInstance.atom;
+    const gridX = atomInstance.x * GRID_SIZE + GRID_SIZE / 2;
+    const gridY = atomInstance.y * GRID_SIZE + GRID_SIZE / 2;
 
     this.mainCtx.clearRect(
-      elementInstance.x * GRID_SIZE,
-      elementInstance.y * GRID_SIZE,
+      atomInstance.x * GRID_SIZE,
+      atomInstance.y * GRID_SIZE,
       GRID_SIZE,
       GRID_SIZE
     );
 
     this.mainCtx.fillStyle = style;
-    if (element.symbol) {
-      this.mainCtx.font = ELEMENT_FONT;
+    if (atom.symbol) {
+      this.mainCtx.font = ATOM_FONT;
       this.mainCtx.textAlign = 'center';
       this.mainCtx.textBaseline = 'middle';
-      this.mainCtx.fillText(element.symbol, gridX, gridY + 3);
+      this.mainCtx.fillText(atom.symbol, gridX, gridY + 3);
     }
-    if (element.valenceElectrons) {
-      for (let i = 0; i < element.valenceElectrons; i++) {
+    if (atom.valenceElectrons) {
+      for (let i = 0; i < atom.valenceElectrons; i++) {
         this.mainCtx.beginPath();
         this.mainCtx.arc(
           gridX + ELECTRON_OFFSETS[i][0],
@@ -186,10 +186,10 @@ export class EditRenderer {
     }
   }
 
-  private findByPosition(x: number, y: number): ElementInstance {
+  private findByPosition(x: number, y: number): AtomInstance {
     const gridPosX = Math.floor(x / GRID_SIZE);
     const gridPosY = Math.floor(y / GRID_SIZE);
-    return this.elements.find(
+    return this.atoms.find(
       (item) => item.x === gridPosX && item.y === gridPosY
     );
   }

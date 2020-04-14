@@ -1,13 +1,13 @@
-import { Component, OnInit } from "@angular/core";
-import { ElementService } from "../shared/element.service";
+import { Component, OnInit } from '@angular/core';
+import { AtomService } from '../shared/atom.service';
 
 @Component({
-  selector: "app-workspace",
-  templateUrl: "./workspace.component.html",
-  styleUrls: ["./workspace.component.scss"],
+  selector: 'app-workspace',
+  templateUrl: './workspace.component.html',
+  styleUrls: ['./workspace.component.scss'],
 })
 export class WorkspaceComponent implements OnInit {
-  constructor(private elementService: ElementService) {}
+  constructor(private elementService: AtomService) {}
 
   elements: ChemElement[];
 
@@ -16,6 +16,6 @@ export class WorkspaceComponent implements OnInit {
   }
 
   drag(event, element) {
-    event.dataTransfer.setData("symbol", element.symbol);
+    event.dataTransfer.setData('symbol', element.symbol);
   }
 }
