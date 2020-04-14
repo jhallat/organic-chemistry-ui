@@ -1,13 +1,12 @@
-<div class="editor-panel">
-  <canvas class="top-canvas" #topCanvas width="1020" height="720"> </canvas>
-  <canvas
-    class="main-canvas"
-    #canvas
-    width="1020"
-    height="720"
-    (drop)="drop($event)"
-    (dragover)="allowDrop($event)"
-    (mousemove)="mouseMove($event)"
-    (mouseleave)="mouseLeave()"
-  ></canvas>
+<div
+  class="editor-panel"
+  (drop)="drop($event)"
+  (dragover)="allowDrop($event)"
+  (mousemove)="mouseMove($event)"
+  (mouseleave)="mouseLeave()"
+>
+  <canvas class="overlay-canvas" #overlayCanvas width="1020" height="720">
+  </canvas>
+  <canvas class="main-canvas" #mainCanvas width="1020" height="720"></canvas>
+  <canvas class="grid-canvas" #gridCanvas width="1020" height="720"> </canvas>
 </div>

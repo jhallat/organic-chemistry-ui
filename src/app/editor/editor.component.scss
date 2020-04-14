@@ -2,7 +2,7 @@
   position: relative;
 }
 
-.top-canvas {
+.overlay-canvas {
   position: absolute;
   top: 0;
   left: 0;
@@ -14,4 +14,11 @@
   top: 0;
   left: 0;
   z-index: 2;
+}
+
+.grid-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
 }
