@@ -5,6 +5,7 @@ export enum AtomAction {
 export class AtomDefinition {
   name: string;
   symbol: string;
+  atomicNumber: number;
   valenceElectrons: number;
   electronCapacity: number;
 }

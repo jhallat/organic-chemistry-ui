@@ -21,7 +21,8 @@
   font-family: sans-serif;
   cursor: pointer;
   padding: 5px;
-}
-.menu-option:hover {
-  color: #7986cb;
+
+  &:hover {
+    color: #7986cb;
+  }
 }

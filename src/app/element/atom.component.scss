@@ -1,1 +1,22 @@
+.atom {
+  width: 58px;
+  height: 60px;
+  font-family: sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #19247e;
+  border-radius: 4px;
+}
 
+.atomic-number {
+  font-size: 15px;
+}
+
+.symbol {
+  font-size: 30px;
+}
