@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core';
 
 import { AppComponent } from './app.component';
 import { WorkspaceComponent } from './workspace/workspace.component';
-import { ElementComponent } from './element/element.component';
+import { AtomComponent } from './element/atom.component';
 import { EditorComponent } from './editor/editor.component';
 import { ContextMenuComponent } from './context-menu/context-menu.component';
 
@@ -11,14 +11,12 @@ import { ContextMenuComponent } from './context-menu/context-menu.component';
   declarations: [
     AppComponent,
     WorkspaceComponent,
-    ElementComponent,
+    AtomComponent,
     EditorComponent,
-    ContextMenuComponent
+    ContextMenuComponent,
   ],
-  imports: [
-    BrowserModule
-  ],
+  imports: [BrowserModule],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

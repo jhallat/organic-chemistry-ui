@@ -1,10 +1,10 @@
 .context-menu {
-  background-color: #eeeeee;
+  background-color: white;
   border-width: 1px;
   border-style: solid;
   border-radius: 4px;
-  border-color: #222222;
-  box-shadow: 3px 3px 5px gray;
+  border-color: #999999;
+  box-shadow: 2px 2px 4px gray;
   min-width: 100px;
   position: absolute;
 }
@@ -23,6 +23,5 @@
   padding: 5px;
 }
 .menu-option:hover {
-  background-color: #3333dd;
-  color: #dddddd;
+  color: #7986cb;
 }

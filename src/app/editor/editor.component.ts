@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { AtomService } from '../shared/atom.service';
 import { EditRenderer } from '../shared/edit-renderer';
+import { AtomDefinition, AtomAction } from '../shared/atom';
 
 @Component({
   selector: 'app-editor',
@@ -60,7 +61,7 @@ export class EditorComponent implements OnInit {
 
   contextMenu(event) {
     event.preventDefault();
-    if (this.renderer.isOccupied(event.offsetX, event.offsetY)) {
+    if (this.renderer.isSelected(event.offsetX, event.offsetY)) {
       this.contextVisible = true;
       this.contextPosition = {
         top: event.offsetY,
@@ -68,6 +69,13 @@ export class EditorComponent implements OnInit {
       };
     } else {
       this.contextVisible = false;
+    }
+  }
+
+  contextAction(event) {
+    this.contextVisible = false;
+    if (event === AtomAction.Delete) {
+      this.renderer.deleteSelected();
     }
   }
 }

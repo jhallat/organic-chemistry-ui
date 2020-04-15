@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AtomService } from '../shared/atom.service';
+import { AtomDefinition } from '../shared/atom';
 
 @Component({
   selector: 'app-workspace',
@@ -7,15 +8,15 @@ import { AtomService } from '../shared/atom.service';
   styleUrls: ['./workspace.component.scss'],
 })
 export class WorkspaceComponent implements OnInit {
-  constructor(private elementService: AtomService) {}
+  constructor(private atomService: AtomService) {}
 
-  elements: ChemElement[];
+  atoms: AtomDefinition[];
 
   ngOnInit() {
-    this.elements = this.elementService.findAll();
+    this.atoms = this.atomService.findAll();
   }
 
-  drag(event, element) {
-    event.dataTransfer.setData('symbol', element.symbol);
+  drag(event, atom) {
+    event.dataTransfer.setData('symbol', atom.symbol);
   }
 }

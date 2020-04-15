@@ -1,12 +1,12 @@
-import { Component, OnInit, ViewChild, ElementRef, Input } from "@angular/core";
+import { Component, OnInit, ViewChild, ElementRef, Input } from '@angular/core';
 
 @Component({
-  selector: "app-element",
-  templateUrl: "./element.component.html",
-  styleUrls: ["./element.component.scss"],
+  selector: 'app-atom',
+  templateUrl: './atom.component.html',
+  styleUrls: ['./atom.component.scss'],
 })
-export class ElementComponent implements OnInit {
-  @ViewChild("canvas", { static: true })
+export class AtomComponent implements OnInit {
+  @ViewChild('canvas', { static: true })
   canvas: ElementRef<HTMLCanvasElement>;
 
   private ctx: CanvasRenderingContext2D;
@@ -28,19 +28,19 @@ export class ElementComponent implements OnInit {
   constructor() {}
 
   ngOnInit() {
-    this.ctx = this.canvas.nativeElement.getContext("2d");
+    this.ctx = this.canvas.nativeElement.getContext('2d');
     this.canvas.nativeElement.width = this.size;
     this.canvas.nativeElement.height = this.size;
-    this.ctx.fillStyle = "#FFFFFF";
-    this.ctx.strokeStyle = "#000000";
+    this.ctx.fillStyle = '#FFFFFF';
+    this.ctx.strokeStyle = '#000000';
     this.ctx.fillRect(0, 0, 60, 60);
     this.ctx.strokeRect(0, 0, 60, 60);
 
     if (this.symbol) {
-      this.ctx.fillStyle = "#000000";
-      this.ctx.font = "30px sans-serif";
-      this.ctx.textAlign = "center";
-      this.ctx.textBaseline = "middle";
+      this.ctx.fillStyle = '#000000';
+      this.ctx.font = '30px sans-serif';
+      this.ctx.textAlign = 'center';
+      this.ctx.textBaseline = 'middle';
       this.ctx.fillText(this.symbol, 30, 33);
     }
     if (this.valenceElectrons) {
@@ -53,7 +53,7 @@ export class ElementComponent implements OnInit {
           0,
           2 * Math.PI
         );
-        this.ctx.fillStyle = "black";
+        this.ctx.fillStyle = 'black';
         this.ctx.fill();
       }
     }

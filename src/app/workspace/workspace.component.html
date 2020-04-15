@@ -1,12 +1,13 @@
 <div class="workspace">
-  <div class="element-toolbar">
-    <div *ngFor="let element of elements" class="element-container">
-      <app-element
-        symbol="{{ element.symbol }}"
-        valenceElectrons="{{ element.valenceElectrons }}"
+  <div class="atom-toolbar">
+    <div *ngFor="let atom of atoms" class="atom-container">
+      <app-atom
+        symbol="{{ atom.symbol }}"
+        valenceElectrons="{{ atom.valenceElectrons }}"
         draggable="true"
-        (dragstart)="drag($event, element)"
-      ></app-element>
+        (dragstart)="drag($event, atom)"
+      >
+      </app-atom>
     </div>
   </div>
   <div>

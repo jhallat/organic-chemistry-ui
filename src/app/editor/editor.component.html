@@ -3,6 +3,7 @@
   [hidden]="!contextVisible"
   [top]="contextPosition.top"
   [left]="contextPosition.left"
+  (action)="contextAction($event)"
 ></app-context-menu>
 <div
   class="editor-panel"

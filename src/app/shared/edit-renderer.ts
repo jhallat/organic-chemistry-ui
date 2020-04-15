@@ -1,15 +1,16 @@
 import { ElementRef } from '@angular/core';
+import { AtomInstance, AtomDefinition } from './atom';
 
 const GRID_SIZE = 60;
 const GRID_STYLE = '#DEDEDE';
 const GRID_BORDER_STYLE = '#000000';
 
-const CURSOR_STYLE = '#0000DD';
+const CURSOR_STYLE = '#7986CB';
 const CURSOR_PADDING = 2;
 
 const ATOM_FONT = '30px sans-serif';
 const ATOM_NORMAL_STYLE = 'black';
-const ATOM_SELECTED_STYLE = '#0000DD';
+const ATOM_SELECTED_STYLE = '#273993';
 
 const ELECTRON_OFFSETS = [
   [-4, -18],
@@ -101,7 +102,15 @@ export class EditRenderer {
   }
 
   isOccupied(x: number, y: number): boolean {
-    if (this.findByPosition(x, y)) {
+    if (this.findByPosition(this.atoms, x, y)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  isSelected(x: number, y: number): boolean {
+    if (this.findByPosition(this.selectedAtoms, x, y)) {
       return true;
     } else {
       return false;
@@ -111,17 +120,13 @@ export class EditRenderer {
   addAtom(atom: AtomDefinition, x: number, y: number) {
     const gridPosX = Math.floor(x / GRID_SIZE);
     const gridPosY = Math.floor(y / GRID_SIZE);
-    const atomInstance: AtomInstance = {
-      x: gridPosX,
-      y: gridPosY,
-      atom,
-    };
+    const atomInstance = new AtomInstance(atom, gridPosX, gridPosY);
     this.atoms.push(atomInstance);
     this.drawAtom(atomInstance, ATOM_NORMAL_STYLE);
   }
 
   singleSelect(x: number, y: number) {
-    const instance = this.findByPosition(x, y);
+    const instance = this.findByPosition(this.atoms, x, y);
     for (const selected of this.selectedAtoms) {
       this.drawAtom(selected, ATOM_NORMAL_STYLE);
     }
@@ -134,12 +139,29 @@ export class EditRenderer {
   }
 
   multiSelect(x: number, y: number) {
-    const instance = this.findByPosition(x, y);
+    const instance = this.findByPosition(this.atoms, x, y);
     if (instance) {
       this.selectedAtoms.push(instance);
       this.drawAtom(instance, ATOM_SELECTED_STYLE);
       this.drawSelectSquare(instance);
     }
+  }
+
+  deleteSelected() {
+    for (const selected of this.selectedAtoms) {
+      const index = this.atoms.findIndex(
+        (item) => item.x === selected.x && item.y === selected.y
+      );
+      const atomInstance = this.atoms[index];
+      this.atoms.splice(index, 1);
+      this.mainCtx.clearRect(
+        atomInstance.x * GRID_SIZE,
+        atomInstance.y * GRID_SIZE,
+        GRID_SIZE,
+        GRID_SIZE
+      );
+    }
+    this.selectedAtoms = [];
   }
 
   private drawSelectSquare(atomInstance: AtomInstance) {
@@ -186,12 +208,10 @@ export class EditRenderer {
     }
   }
 
-  private findByPosition(x: number, y: number): AtomInstance {
+  private findByPosition(list, x: number, y: number): AtomInstance {
     const gridPosX = Math.floor(x / GRID_SIZE);
     const gridPosY = Math.floor(y / GRID_SIZE);
-    return this.atoms.find(
-      (item) => item.x === gridPosX && item.y === gridPosY
-    );
+    return list.find((item) => item.x === gridPosX && item.y === gridPosY);
   }
 
   private drawline(
