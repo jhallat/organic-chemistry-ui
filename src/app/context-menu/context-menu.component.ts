@@ -9,6 +9,8 @@ import { AtomAction } from '../shared/atom';
 export class ContextMenuComponent implements OnInit {
   @Input() top: number;
   @Input() left: number;
+  // TODO create a class for this
+  @Input() contextOptions: any;
   @Output() action = new EventEmitter<AtomAction>();
 
   constructor() {}

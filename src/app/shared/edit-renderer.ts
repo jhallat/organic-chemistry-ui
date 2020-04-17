@@ -164,6 +164,10 @@ export class EditRenderer {
     this.selectedAtoms = [];
   }
 
+  get selected() {
+    return this.selectedAtoms;
+  }
+
   private drawSelectSquare(atomInstance: AtomInstance) {
     this.mainCtx.strokeStyle = SELECT_STYLE;
     this.mainCtx.strokeRect(

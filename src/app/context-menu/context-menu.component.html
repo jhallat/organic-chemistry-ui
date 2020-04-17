@@ -1,5 +1,20 @@
 <div class="context-menu" [style.top.px]="top" [style.left.px]="left">
   <ul class="menu-options">
-    <li class="menu-option" (click)="onDelete()">Delete</li>
+    <li class="menu-option" [hidden]="!contextOptions.singleBond">
+      Single Bond
+    </li>
+    <li class="menu-option" [hidden]="!contextOptions.doubleBond">
+      Double Bond
+    </li>
+    <li class="menu-option" [hidden]="!contextOptions.tripleBond">
+      Triple Bond
+    </li>
+    <li
+      class="menu-option"
+      [hidden]="!contextOptions.delete"
+      (click)="onDelete()"
+    >
+      Delete
+    </li>
   </ul>
 </div>

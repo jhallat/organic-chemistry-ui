@@ -11,7 +11,5 @@ export class AtomComponent implements OnInit {
 
   constructor() {}
 
-  ngOnInit() {
-    console.log(this.atom);
-  }
+  ngOnInit() {}
 }
