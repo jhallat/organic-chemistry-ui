@@ -1,12 +1,24 @@
 <div class="context-menu" [style.top.px]="top" [style.left.px]="left">
   <ul class="menu-options">
-    <li class="menu-option" [hidden]="!contextOptions.singleBond">
+    <li
+      class="menu-option"
+      [hidden]="!contextOptions.singleBond"
+      (click)="onSingleBond()"
+    >
       Single Bond
     </li>
-    <li class="menu-option" [hidden]="!contextOptions.doubleBond">
+    <li
+      class="menu-option"
+      [hidden]="!contextOptions.doubleBond"
+      (click)="onDoubleBond()"
+    >
       Double Bond
     </li>
-    <li class="menu-option" [hidden]="!contextOptions.tripleBond">
+    <li
+      class="menu-option"
+      [hidden]="!contextOptions.tripleBond"
+      (click)="onTripleBond()"
+    >
       Triple Bond
     </li>
     <li

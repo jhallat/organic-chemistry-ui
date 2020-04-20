@@ -20,4 +20,16 @@ export class ContextMenuComponent implements OnInit {
   onDelete() {
     this.action.emit(AtomAction.Delete);
   }
+
+  onSingleBond() {
+    this.action.emit(AtomAction.SingleBond);
+  }
+
+  onDoubleBond() {
+    this.action.emit(AtomAction.DoubleBond);
+  }
+
+  onTripleBond() {
+    this.action.emit(AtomAction.TripleBond);
+  }
 }

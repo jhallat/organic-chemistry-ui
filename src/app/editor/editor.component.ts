@@ -1,7 +1,12 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { AtomService } from '../shared/atom.service';
 import { EditRenderer } from '../shared/edit-renderer';
-import { AtomDefinition, AtomAction, AtomInstance } from '../shared/atom';
+import {
+  AtomDefinition,
+  AtomAction,
+  AtomInstance,
+  BondType,
+} from '../shared/atom';
 
 @Component({
   selector: 'app-editor',
@@ -104,9 +109,22 @@ export class EditorComponent implements OnInit {
   }
 
   contextAction(event) {
+    console.log(event);
     this.contextVisible = false;
     if (event === AtomAction.Delete) {
       this.renderer.deleteSelected();
+    }
+    if (event === AtomAction.SingleBond) {
+      const atoms = this.renderer.selected;
+      this.renderer.createBond(atoms[0].id, atoms[1].id, BondType.Single);
+    }
+    if (event === AtomAction.DoubleBond) {
+      const atoms = this.renderer.selected;
+      this.renderer.createBond(atoms[0].id, atoms[1].id, BondType.Double);
+    }
+    if (event === AtomAction.TripleBond) {
+      const atoms = this.renderer.selected;
+      this.renderer.createBond(atoms[0].id, atoms[1].id, BondType.Triple);
     }
   }
 

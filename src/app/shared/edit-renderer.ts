@@ -1,5 +1,7 @@
 import { ElementRef } from '@angular/core';
-import { AtomInstance, AtomDefinition } from './atom';
+import { AtomInstance, AtomDefinition, BondType, Bond } from './atom';
+import { isNgTemplate } from '@angular/compiler';
+import { listLazyRoutes } from '@angular/compiler/src/aot/lazy_routes';
 
 const GRID_SIZE = 60;
 const GRID_STYLE = '#DEDEDE';
@@ -12,15 +14,35 @@ const ATOM_FONT = '30px sans-serif';
 const ATOM_NORMAL_STYLE = 'black';
 const ATOM_SELECTED_STYLE = '#273993';
 
-const ELECTRON_OFFSETS = [
-  [-4, -18],
-  [4, 18],
-  [-18, -4],
-  [18, 6],
-  [4, -18],
-  [-4, 18],
-  [-18, -6],
-  [18, 4],
+const JOIN_TOP = 0;
+const JOIN_RIGHT = 1;
+const JOIN_BOTTOM = 2;
+const JOIN_LEFT = 3;
+
+const JOIN_X = 0;
+const JOIN_Y = 1;
+
+const JOIN_POINTS = [
+  [
+    [-6, -18],
+    [0, -18],
+    [6, -18],
+  ],
+  [
+    [18, -6],
+    [18, 0],
+    [18, 6],
+  ],
+  [
+    [-6, 18],
+    [0, 18],
+    [6, 18],
+  ],
+  [
+    [-18, -6],
+    [-18, 0],
+    [-18, 6],
+  ],
 ];
 
 const SELECT_PADDING = 3;
@@ -120,7 +142,15 @@ export class EditRenderer {
   addAtom(atom: AtomDefinition, x: number, y: number) {
     const gridPosX = Math.floor(x / GRID_SIZE);
     const gridPosY = Math.floor(y / GRID_SIZE);
-    const atomInstance = new AtomInstance(atom, gridPosX, gridPosY);
+    let id = 1;
+    if (this.atoms.length > 0) {
+      id =
+        this.atoms
+          .map((item) => item.id)
+          .reduce((prev, curr) => (prev > curr ? prev : curr)) + 1;
+    }
+
+    const atomInstance = new AtomInstance(id, atom, gridPosX, gridPosY);
     this.atoms.push(atomInstance);
     this.drawAtom(atomInstance, ATOM_NORMAL_STYLE);
   }
@@ -145,6 +175,18 @@ export class EditRenderer {
       this.drawAtom(instance, ATOM_SELECTED_STYLE);
       this.drawSelectSquare(instance);
     }
+  }
+
+  createBond(id1: number, id2: number, type: BondType) {
+    console.log(`createBond(${id1}, ${id2}, ${type})`);
+    const atom1 = this.atoms.find((item) => item.id === id1);
+    const atom2 = this.atoms.find((item) => item.id === id2);
+    const bond1 = { targetId: id2, type };
+    atom1.bonds.push(bond1);
+    const bond2 = { targetId: id1, type };
+    atom2.bonds.push(bond2);
+    this.drawAtom(atom1, ATOM_NORMAL_STYLE);
+    this.drawAtom(atom2, ATOM_NORMAL_STYLE);
   }
 
   deleteSelected() {
@@ -198,24 +240,114 @@ export class EditRenderer {
       this.mainCtx.fillText(atom.symbol, gridX, gridY + 3);
     }
     if (atom.valenceElectrons) {
-      for (let i = 0; i < atom.valenceElectrons; i++) {
-        this.mainCtx.beginPath();
-        this.mainCtx.arc(
-          gridX + ELECTRON_OFFSETS[i][0],
-          gridY + ELECTRON_OFFSETS[i][1],
-          3,
-          0,
-          2 * Math.PI
-        );
-        this.mainCtx.fill();
+      this.drawDots(gridX, gridY, atomInstance, style);
+    }
+  }
+
+  private drawDots(x: number, y: number, atom: AtomInstance, style: string) {
+    if (atom.bonds.length > 0) {
+      for (const bond of atom.bonds) {
+        console.log('bond type = ' + bond.type);
+        if (bond.targetId < atom.id) {
+          const targetAtom = this.findById(bond.targetId);
+          const targetX = targetAtom.x * GRID_SIZE + GRID_SIZE / 2;
+          const targetY = targetAtom.y * GRID_SIZE + GRID_SIZE / 2;
+          let source = 0;
+          let target = 0;
+          if (targetAtom.y < atom.y) {
+            source = JOIN_TOP;
+            target = JOIN_BOTTOM;
+          }
+          if (targetAtom.x > atom.x) {
+            source = JOIN_RIGHT;
+            target = JOIN_LEFT;
+          }
+          if (targetAtom.y > atom.y) {
+            source = JOIN_BOTTOM;
+            target = JOIN_TOP;
+          }
+          if (targetAtom.x < atom.x) {
+            source = JOIN_LEFT;
+            target = JOIN_RIGHT;
+          }
+          if (bond.type === BondType.Single || bond.type === BondType.Triple) {
+            this.drawLine(
+              x + JOIN_POINTS[source][1][JOIN_X],
+              y + JOIN_POINTS[source][1][JOIN_Y],
+              targetX + JOIN_POINTS[target][1][JOIN_X],
+              targetY + JOIN_POINTS[target][1][JOIN_Y],
+              style
+            );
+          }
+          if (bond.type === BondType.Double || bond.type === BondType.Triple) {
+            this.drawLine(
+              x + JOIN_POINTS[source][0][JOIN_X],
+              y + JOIN_POINTS[source][0][JOIN_Y],
+              targetX + JOIN_POINTS[target][0][JOIN_X],
+              targetY + JOIN_POINTS[target][0][JOIN_Y],
+              style
+            );
+            this.drawLine(
+              x + JOIN_POINTS[source][2][JOIN_X],
+              y + JOIN_POINTS[source][2][JOIN_Y],
+              targetX + JOIN_POINTS[target][2][JOIN_X],
+              targetY + JOIN_POINTS[target][2][JOIN_Y],
+              style
+            );
+          }
+        }
       }
     }
+
+    const electronPlacement = [0, 0, 0, 0];
+    let position = 0;
+    for (let i = 0; i < atom.atom.valenceElectrons; i++) {
+      electronPlacement[position] += 1;
+      position++;
+      if (position > 3) {
+        position = 0;
+      }
+    }
+    for (let i = 0; i < 4; i++) {
+      if (electronPlacement[i] === 1) {
+        this.drawDot(x + JOIN_POINTS[i][1][0], y + JOIN_POINTS[i][1][1], style);
+      }
+      if (electronPlacement[i] === 2) {
+        this.drawDot(x + JOIN_POINTS[i][0][0], y + JOIN_POINTS[i][0][1], style);
+        this.drawDot(x + JOIN_POINTS[i][2][0], y + JOIN_POINTS[i][2][1], style);
+      }
+    }
+  }
+
+  private drawDot(x: number, y: number, style: string) {
+    this.mainCtx.fillStyle = style;
+    this.mainCtx.beginPath();
+    this.mainCtx.arc(x, y, 3, 0, 2 * Math.PI);
+    this.mainCtx.fill();
+  }
+
+  private drawLine(
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    style: string
+  ) {
+    this.mainCtx.strokeStyle = style;
+    this.mainCtx.beginPath();
+    this.mainCtx.moveTo(x1, y1);
+    this.mainCtx.lineTo(x2, y2);
+    this.mainCtx.stroke();
   }
 
   private findByPosition(list, x: number, y: number): AtomInstance {
     const gridPosX = Math.floor(x / GRID_SIZE);
     const gridPosY = Math.floor(y / GRID_SIZE);
     return list.find((item) => item.x === gridPosX && item.y === gridPosY);
+  }
+
+  private findById(id: number) {
+    return this.atoms.find((item) => item.id === id);
   }
 
   private drawline(
